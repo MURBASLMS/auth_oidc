@@ -688,6 +688,11 @@ class authcode extends base {
             if (empty($username)) {
                 $username = $oidcuniqid;
 
+                //Updated to handle changes to o365 as per INC0152074 -longform usernames
+	        $username = $idtoken->claim('upn');
+	        $userarr = explode("@", $username, 2);
+	        $username = $userarr[0];
+
                 // If upn claim is missing, it can mean either the IdP is not Microsoft Entra ID, or it's a guest user.
                 if (auth_oidc_is_local_365_installed()) {
                     $apiclient = \local_o365\utils::get_api();
