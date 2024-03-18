@@ -683,15 +683,15 @@ class authcode extends base {
                     $username = $idtoken->claim('unique_name');
                 }
             }
+
+            //Updated to handle changes to o365 as per INC0152074 -longform usernames
+	    $username = $idtoken->claim('upn');
+	    $userarr = explode("@", $username, 2);
+	    $username = $userarr[0];
             $originalupn = null;
 
             if (empty($username)) {
                 $username = $oidcuniqid;
-
-                //Updated to handle changes to o365 as per INC0152074 -longform usernames
-	        $username = $idtoken->claim('upn');
-	        $userarr = explode("@", $username, 2);
-	        $username = $userarr[0];
 
                 // If upn claim is missing, it can mean either the IdP is not Microsoft Entra ID, or it's a guest user.
                 if (auth_oidc_is_local_365_installed()) {
@@ -747,6 +747,10 @@ class authcode extends base {
 
             // Generate a Moodle username.
             // Use 'upn' if available for username (Microsoft-specific), or fall back to lower-case oidcuniqid.
+            $username = $idtoken->claim('upn');
+            $userarr = explode("@", $username, 2);
+            $username = $userarr[0];
+
             if (get_config('auth_oidc', 'idptype') == AUTH_OIDC_IDP_TYPE_MICROSOFT_IDENTITY_PLATFORM) {
                 $username = $idtoken->claim('preferred_username');
                 if (empty($username)) {
